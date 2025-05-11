@@ -15,7 +15,8 @@ import (
 
 func GetTransactions(c *gin.Context) {
 	var transactions []models.Transaction
-	database.DB.Find(&transactions)
+	userID := c.GetUint("user_id")
+	database.DB.Where("user_id = ?", userID).Find(&transactions)
 	c.JSON(http.StatusOK, transactions)
 }
 
@@ -35,7 +36,6 @@ func CreateTransaction(c *gin.Context) {
 		Type       string `json:"type"`
 		Category   string `json:"category"`
 		CategoryID uint   `json:"category_id"`
-		UserID     uint   `json:"user_id"`
 	}
 
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -55,6 +55,9 @@ func CreateTransaction(c *gin.Context) {
 	var amountValue float64
 	fmt.Sscanf(req.Amount, "%f", &amountValue)
 
+	// Récupérer l'ID de l'utilisateur depuis le contexte
+	userID := c.GetUint("user_id")
+
 	transaction := models.Transaction{
 		Icon:       req.Icon,
 		Title:      req.Title,
@@ -64,7 +67,7 @@ func CreateTransaction(c *gin.Context) {
 		Type:       req.Type,
 		Category:   req.Category,
 		CategoryID: req.CategoryID,
-		UserID:     req.UserID,
+		UserID:     userID,
 	}
 
 	database.DB.Create(&transaction)
@@ -73,17 +76,19 @@ func CreateTransaction(c *gin.Context) {
 
 func DeleteTransaction(c *gin.Context) {
 	id := c.Param("id")
-	database.DB.Delete(&models.Transaction{}, id)
+	userID := c.GetUint("user_id")
+	database.DB.Where("id = ? AND user_id = ?", id, userID).Delete(&models.Transaction{})
 	c.Status(http.StatusNoContent)
 }
 
 func GetBalance(c *gin.Context) {
 	var transactions []models.Transaction
-	database.DB.Find(&transactions)
+	userID := c.GetUint("user_id")
+	database.DB.Where("user_id = ?", userID).Find(&transactions)
 
 	var balance float64 = 0
 	for _, t := range transactions {
-        balance += t.Amount
+		balance += t.Amount
 	}
 
 	c.JSON(http.StatusOK, gin.H{"balance": balance})
