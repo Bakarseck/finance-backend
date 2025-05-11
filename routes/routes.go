@@ -27,7 +27,6 @@ func SetupRoutes(r *gin.Engine) {
 
 			protected.GET("/balance", controllers.GetBalance)
 
-			protected.GET("/balance", controllers.GetBalance)
 			protected.GET("/statistics", controllers.GetStatistics)
 		}
 	}
