@@ -26,6 +26,9 @@ func SetupRoutes(r *gin.Engine) {
 			protected.POST("/categories", controllers.CreateCategory)
 
 			protected.GET("/balance", controllers.GetBalance)
+
+			protected.GET("/balance", controllers.GetBalance)
+			protected.GET("/statistics", controllers.GetStatistics)
 		}
 	}
 }
