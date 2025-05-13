@@ -28,6 +28,11 @@ func SetupRoutes(r *gin.Engine) {
 			protected.GET("/balance", controllers.GetBalance)
 
 			protected.GET("/statistics", controllers.GetStatistics)
+
+			protected.GET("/profile", controllers.GetProfile)
+			protected.PUT("/profile/name", controllers.UpdateName)
+			protected.PUT("/profile/email", controllers.UpdateEmail)
+			protected.PUT("/profile/currency", controllers.UpdateCurrency)
 		}
 	}
 }

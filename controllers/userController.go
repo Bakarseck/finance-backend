@@ -114,3 +114,64 @@ func GetProfile(c *gin.Context) {
 		"currency":  user.Currency,
 	})
 }
+
+func UpdateName(c *gin.Context) {
+	userID := c.GetUint("user_id")
+
+	var payload struct {
+		Name string `json:"name"`
+	}
+
+	if err := c.ShouldBindJSON(&payload); err != nil || payload.Name == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Nom invalide"})
+		return
+	}
+
+	if err := database.DB.Model(&models.User{}).Where("id = ?", userID).Update("full_name", payload.Name).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erreur de mise à jour du nom"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Nom mis à jour avec succès"})
+}
+
+func UpdateEmail(c *gin.Context) {
+	userID := c.GetUint("user_id")
+
+	var payload struct {
+		Email string `json:"email"`
+	}
+
+	if err := c.ShouldBindJSON(&payload); err != nil || payload.Email == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Email invalide"})
+		return
+	}
+
+	if err := database.DB.Model(&models.User{}).Where("id = ?", userID).Update("email", payload.Email).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erreur de mise à jour de l'email"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Email mis à jour avec succès"})
+}
+
+func UpdateCurrency(c *gin.Context) {
+	userID := c.GetUint("user_id")
+
+	var payload struct {
+		Currency string `json:"currency"`
+	}
+
+	if err := c.ShouldBindJSON(&payload); err != nil || payload.Currency == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Devise invalide"})
+		return
+	}
+
+	if err := database.DB.Model(&models.User{}).Where("id = ?", userID).Update("currency", payload.Currency).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erreur de mise à jour de la devise"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Devise mise à jour avec succès"})
+}
+
