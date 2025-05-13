@@ -70,6 +70,9 @@ func LoginUser(c *gin.Context) {
 	// ✅ Création du token JWT
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"user_id": user.ID,
+		"email":   user.Email,
+		"full_name": user.FullName,
+		"currency":  user.Currency,
 		"exp":     time.Now().Add(24 * time.Hour).Unix(),
 	})
 
@@ -94,4 +97,20 @@ func ProtectedRoute(c *gin.Context) {
 	userID := c.GetUint("user_id")
 	// Use userID as needed
 	c.JSON(http.StatusOK, gin.H{"user_id": userID})
+}
+
+func GetProfile(c *gin.Context) {
+	userID := c.GetUint("user_id")
+	var user models.User
+	if err := database.DB.First(&user, userID).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Utilisateur introuvable"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"id":        user.ID,
+		"full_name": user.FullName,
+		"email":     user.Email,
+		"currency":  user.Currency,
+	})
 }
