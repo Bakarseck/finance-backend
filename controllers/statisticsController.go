@@ -3,6 +3,7 @@ package controllers
 import (
 	"finance-backend/database"
 	"finance-backend/models"
+	"log"
 	"net/http"
 	"time"
 
@@ -48,21 +49,34 @@ func GetStatistics(c *gin.Context) {
 			"category": cat,
 			"amount":   amount,
 			"percent":  percent,
-		}
-	)
+		})
 	}
 
-	fmt.Println(gin.H{
+	// Créer la réponse
+	response := gin.H{
 		"expenses":   expenses,
 		"incomes":    incomes,
 		"balance":    balance,
 		"categories": categories,
-	})
+	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"expenses":   expenses,
-		"incomes":    incomes,
-		"balance":    balance,
-		"categories": categories,
-	})
+	// Afficher la réponse dans la console
+	log.Printf("=== STATISTIQUES POUR L'UTILISATEUR %d ===", userID)
+	log.Printf("Dépenses: %.2f", expenses)
+	log.Printf("Revenus: %.2f", incomes)
+	log.Printf("Solde: %.2f", balance)
+	log.Printf("Nombre de catégories: %d", len(categories))
+
+	if len(categories) > 0 {
+		log.Printf("Répartition par catégorie:")
+		for _, cat := range categories {
+			log.Printf("  - %s: %.2f (%.1f%%)",
+				cat["category"],
+				cat["amount"],
+				cat["percent"])
+		}
+	}
+	log.Printf("================================")
+
+	c.JSON(http.StatusOK, response)
 }
