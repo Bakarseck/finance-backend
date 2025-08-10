@@ -8,6 +8,8 @@ import (
 	"strings"
 	"time"
 
+	"math"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -90,7 +92,8 @@ func GetStatistics(c *gin.Context) {
 	for cat, amount := range expenseCategoryTotals {
 		percent := 0.0
 		if expenses > 0 {
-			percent = (amount / expenses) * 100
+			// Utiliser la valeur absolue pour le calcul du pourcentage
+			percent = (math.Abs(amount) / expenses) * 100
 		}
 		expenseCategories = append(expenseCategories, gin.H{
 			"category": cat,
