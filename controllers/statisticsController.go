@@ -5,6 +5,7 @@ import (
 	"finance-backend/models"
 	"log"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -61,18 +62,27 @@ func GetStatistics(c *gin.Context) {
 	for _, t := range transactions {
 		log.Printf("Traitement transaction: Type=%s, Montant=%.2f, Catégorie=%s", t.Type, t.Amount, t.Category)
 
-		if t.Type == "expense" {
+		// Normaliser le type pour la comparaison (gérer majuscules/minuscules)
+		transactionType := strings.ToLower(t.Type)
+
+		if transactionType == "expense" {
 			expenses += t.Amount
 			categoryTotals[t.Category] += t.Amount
 			categoryLabels[t.Category] = t.Category
 			log.Printf("  -> Ajouté aux dépenses: %.2f", t.Amount)
-		} else if t.Type == "income" {
+		} else if transactionType == "income" {
 			incomes += t.Amount
 			log.Printf("  -> Ajouté aux revenus: %.2f", t.Amount)
 		} else {
 			log.Printf("  -> Type inconnu: %s", t.Type)
 		}
-		balance += t.Amount
+
+		// Calculer le solde : revenus - dépenses
+		if transactionType == "income" {
+			balance += t.Amount
+		} else if transactionType == "expense" {
+			balance -= t.Amount
+		}
 	}
 
 	// Préparer la répartition par catégorie
