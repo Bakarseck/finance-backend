@@ -56,8 +56,8 @@ func GetStatistics(c *gin.Context) {
 	expenses := 0.0
 	incomes := 0.0
 	balance := 0.0
-	categoryTotals := make(map[string]float64)
-	categoryLabels := make(map[string]string)
+	expenseCategoryTotals := make(map[string]float64)
+	incomeCategoryTotals := make(map[string]float64)
 
 	for _, t := range transactions {
 		log.Printf("Traitement transaction: Type=%s, Montant=%.2f, Catégorie=%s", t.Type, t.Amount, t.Category)
@@ -67,11 +67,11 @@ func GetStatistics(c *gin.Context) {
 
 		if transactionType == "expense" {
 			expenses += t.Amount
-			categoryTotals[t.Category] += t.Amount
-			categoryLabels[t.Category] = t.Category
+			expenseCategoryTotals[t.Category] += t.Amount
 			log.Printf("  -> Ajouté aux dépenses: %.2f", t.Amount)
 		} else if transactionType == "income" {
 			incomes += t.Amount
+			incomeCategoryTotals[t.Category] += t.Amount
 			log.Printf("  -> Ajouté aux revenus: %.2f", t.Amount)
 		} else {
 			log.Printf("  -> Type inconnu: %s", t.Type)
@@ -85,15 +85,28 @@ func GetStatistics(c *gin.Context) {
 		}
 	}
 
-	// Préparer la répartition par catégorie
-	totalExpenses := expenses
-	categories := []gin.H{}
-	for cat, amount := range categoryTotals {
+	// Préparer la répartition par catégorie pour les dépenses
+	expenseCategories := []gin.H{}
+	for cat, amount := range expenseCategoryTotals {
 		percent := 0.0
-		if totalExpenses > 0 {
-			percent = (amount / totalExpenses) * 100
+		if expenses > 0 {
+			percent = (amount / expenses) * 100
 		}
-		categories = append(categories, gin.H{
+		expenseCategories = append(expenseCategories, gin.H{
+			"category": cat,
+			"amount":   amount,
+			"percent":  percent,
+		})
+	}
+
+	// Préparer la répartition par catégorie pour les revenus
+	incomeCategories := []gin.H{}
+	for cat, amount := range incomeCategoryTotals {
+		percent := 0.0
+		if incomes > 0 {
+			percent = (amount / incomes) * 100
+		}
+		incomeCategories = append(incomeCategories, gin.H{
 			"category": cat,
 			"amount":   amount,
 			"percent":  percent,
@@ -102,10 +115,11 @@ func GetStatistics(c *gin.Context) {
 
 	// Créer la réponse
 	response := gin.H{
-		"expenses":   expenses,
-		"incomes":    incomes,
-		"balance":    balance,
-		"categories": categories,
+		"expenses":          expenses,
+		"incomes":           incomes,
+		"balance":           balance,
+		"expenseCategories": expenseCategories,
+		"incomeCategories":  incomeCategories,
 	}
 
 	// Afficher la réponse dans la console
@@ -113,11 +127,22 @@ func GetStatistics(c *gin.Context) {
 	log.Printf("Dépenses: %.2f", expenses)
 	log.Printf("Revenus: %.2f", incomes)
 	log.Printf("Solde: %.2f", balance)
-	log.Printf("Nombre de catégories: %d", len(categories))
+	log.Printf("Nombre de catégories de dépenses: %d", len(expenseCategories))
+	log.Printf("Nombre de catégories de revenus: %d", len(incomeCategories))
 
-	if len(categories) > 0 {
-		log.Printf("Répartition par catégorie:")
-		for _, cat := range categories {
+	if len(expenseCategories) > 0 {
+		log.Printf("Répartition des dépenses par catégorie:")
+		for _, cat := range expenseCategories {
+			log.Printf("  - %s: %.2f (%.1f%%)",
+				cat["category"],
+				cat["amount"],
+				cat["percent"])
+		}
+	}
+
+	if len(incomeCategories) > 0 {
+		log.Printf("Répartition des revenus par catégorie:")
+		for _, cat := range incomeCategories {
 			log.Printf("  - %s: %.2f (%.1f%%)",
 				cat["category"],
 				cat["amount"],
