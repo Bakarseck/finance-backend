@@ -91,9 +91,10 @@ func GetStatistics(c *gin.Context) {
 	expenseCategories := []gin.H{}
 	for cat, amount := range expenseCategoryTotals {
 		percent := 0.0
-		if expenses > 0 {
-			// Utiliser la valeur absolue pour le calcul du pourcentage
-			percent = (math.Abs(amount) / expenses) * 100
+		// Utiliser la valeur absolue des dépenses pour le calcul du pourcentage
+		absExpenses := math.Abs(expenses)
+		if absExpenses > 0 {
+			percent = (math.Abs(amount) / absExpenses) * 100
 		}
 		expenseCategories = append(expenseCategories, gin.H{
 			"category": cat,
