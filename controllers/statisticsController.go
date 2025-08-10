@@ -12,7 +12,6 @@ import (
 func GetStatistics(c *gin.Context) {
 	userID := c.GetUint("user_id")
 
-	// Début et fin du mois courant
 	now := time.Now()
 	monthStart := time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, now.Location())
 	monthEnd := monthStart.AddDate(0, 1, 0)
@@ -49,8 +48,16 @@ func GetStatistics(c *gin.Context) {
 			"category": cat,
 			"amount":   amount,
 			"percent":  percent,
-		})
+		}
+	)
 	}
+
+	fmt.Println(gin.H{
+		"expenses":   expenses,
+		"incomes":    incomes,
+		"balance":    balance,
+		"categories": categories,
+	})
 
 	c.JSON(http.StatusOK, gin.H{
 		"expenses":   expenses,
